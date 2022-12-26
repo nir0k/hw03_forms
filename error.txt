@@ -1,0 +1,488 @@
+============================= test session starts =============================
+platform win32 -- Python 3.9.7, pytest-5.3.5, py-1.8.1, pluggy-0.13.1 -- C:\Users\Ivan K\dev\hw03_forms\venv\Scripts\python.exe
+django: settings: yatube.settings (from ini)
+rootdir: C:\Users\Ivan K\dev\hw03_forms, inifile: pytest.ini, testpaths: tests/
+plugins: Faker-12.0.1, django-3.8.0, pythonpath-0.7.3
+collecting ... collected 20 items
+
+tests/test_paginator.py::TestGroupPaginatorView::test_group_paginator_view_get PASSED [  5%]
+tests/test_paginator.py::TestGroupPaginatorView::test_group_paginator_not_in_context_view PASSED [ 10%]
+tests/test_paginator.py::TestGroupPaginatorView::test_index_paginator_not_in_view_context PASSED [ 15%]
+tests/test_paginator.py::TestGroupPaginatorView::test_index_paginator_view PASSED [ 20%]
+tests/test_paginator.py::TestGroupPaginatorView::test_profile_paginator_view PASSED [ 25%]
+tests/test_about.py::TestTemplateView::test_about_author_tech PASSED     [ 30%]
+tests/test_auth_urls.py::TestAuthUrls::test_auth_urls PASSED             [ 35%]
+tests/test_create.py::TestCreateView::test_create_view_get FAILED        [ 40%]
+tests/test_create.py::TestCreateView::test_create_view_post PASSED       [ 45%]
+tests/test_homework.py::TestPost::test_post_create PASSED                [ 50%]
+tests/test_homework.py::TestGroup::test_group_create PASSED              [ 55%]
+tests/test_homework.py::TestGroupView::test_group_view PASSED            [ 60%]
+tests/test_post.py::TestPostView::test_post_view_get PASSED              [ 65%]
+tests/test_post.py::TestPostEditView::test_post_edit_view_get PASSED     [ 70%]
+tests/test_post.py::TestPostEditView::test_post_edit_view_author_get FAILED [ 75%]
+tests/test_post.py::TestPostEditView::test_post_edit_view_author_post FAILED [ 80%]
+tests/test_profile.py::TestProfileView::test_profile_view_get PASSED     [ 85%]
+tests/test_homework.py::TestPost::test_post_model PASSED                 [ 90%]
+tests/test_homework.py::TestPost::test_post_admin PASSED                 [ 95%]
+tests/test_homework.py::TestGroup::test_group_model PASSED               [100%]
+
+================================== FAILURES ===================================
+_____________________ TestCreateView.test_create_view_get _____________________
+
+self = <tests.test_create.TestCreateView object at 0x0000017E34BEA820>
+user_client = <django.test.client.Client object at 0x0000017E3463AE50>
+
+    @pytest.mark.django_db(transaction=True)
+    def test_create_view_get(self, user_client):
+        try:
+            response = user_client.get('/create')
+        except Exception as e:
+            assert False, f'''Страница `/create` работает неправильно. Ошибка: `{e}`'''
+        if response.status_code in (301, 302):
+            response = user_client.get('/create/')
+        assert response.status_code != 404, 'Страница `/create/` не найдена, проверьте этот адрес в *urls.py*'
+        assert 'form' in response.context, 'Проверьте, что передали форму `form` в контекст страницы `/create/`'
+        assert len(response.context['form'].fields) == 2, 'Проверьте, что в форме `form` на страницу `/create/` 2 поля'
+        assert 'group' in response.context['form'].fields, (
+            'Проверьте, что в форме `form` на странице `/create/` есть поле `group`'
+        )
+        assert type(response.context['form'].fields['group']) == forms.models.ModelChoiceField, (
+            'Проверьте, что в форме `form` на странице `/create/` поле `group` типа `ModelChoiceField`'
+        )
+        assert not response.context['form'].fields['group'].required, (
+            'Проверьте, что в форме `form` на странице `/create/` поле `group` не обязательно'
+        )
+    
+        assert 'text' in response.context['form'].fields, (
+            'Проверьте, что в форме `form` на странице `/create/` есть поле `text`'
+        )
+        assert type(response.context['form'].fields['text']) == forms.fields.CharField, (
+            'Проверьте, что в форме `form` на странице `/create/` поле `text` типа `CharField`'
+        )
+>       assert response.context['form'].fields['text'].required, (
+            'Проверьте, что в форме `form` на странице `/create/` поле `text` обязательно'
+        )
+E       AssertionError: Проверьте, что в форме `form` на странице `/create/` поле `text` обязательно
+E       assert False
+E        +  where False = <django.forms.fields.CharField object at 0x0000017E345C70D0>.required
+
+tests\test_create.py:35: AssertionError
+_______________ TestPostEditView.test_post_edit_view_author_get _______________
+
+self = <tests.test_post.TestPostEditView object at 0x0000017E345C1220>
+user_client = <django.test.client.Client object at 0x0000017E34BEA880>
+post_with_group = <Post: Тестовый пост 2>
+
+    @pytest.mark.django_db(transaction=True)
+    def test_post_edit_view_author_get(self, user_client, post_with_group):
+        try:
+            response = user_client.get(f'/posts/{post_with_group.id}/edit')
+        except Exception as e:
+            assert False, f'''Страница `/posts/<post_id>/edit/` работает неправильно. Ошибка: `{e}`'''
+        if response.status_code in (301, 302):
+>           response = user_client.get(f'/posts/{post_with_group.id}/edit/')
+
+tests\test_post.py:58: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\lib\site-packages\django\test\client.py:535: in get
+    response = super().get(path, data=data, secure=secure, **extra)
+venv\lib\site-packages\django\test\client.py:345: in get
+    return self.generic('GET', path, secure=secure, **{
+venv\lib\site-packages\django\test\client.py:422: in generic
+    return self.request(**r)
+venv\lib\site-packages\django\test\client.py:503: in request
+    raise exc_value
+venv\lib\site-packages\django\core\handlers\exception.py:34: in inner
+    response = get_response(request)
+venv\lib\site-packages\django\core\handlers\base.py:115: in _get_response
+    response = self.process_exception_by_middleware(e, request)
+venv\lib\site-packages\django\core\handlers\base.py:113: in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+yatube\posts\views.py:12: in check_user
+    return func(request, *args, **kwargs)
+yatube\posts\views.py:119: in post_edit
+    return render(request, tempalte, context)
+venv\lib\site-packages\django\shortcuts.py:36: in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+venv\lib\site-packages\django\template\loader.py:62: in render_to_string
+    return template.render(context, request)
+venv\lib\site-packages\django\template\backends\django.py:61: in render
+    return self.template.render(context)
+venv\lib\site-packages\django\template\base.py:171: in render
+    return self._render(context)
+venv\lib\site-packages\django\test\utils.py:96: in instrumented_test_render
+    return self.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\loader_tags.py:150: in render
+    return compiled_parent._render(context)
+venv\lib\site-packages\django\test\utils.py:96: in instrumented_test_render
+    return self.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\loader_tags.py:62: in render
+    result = block.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\defaulttags.py:309: in render
+    return nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\defaulttags.py:443: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+venv\lib\site-packages\django\urls\base.py:90: in reverse
+    return iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <URLResolver <module 'posts.urls' from 'C:\\Users\\Ivan K\\dev\\hw03_forms\\yatube\\posts\\urls.py'> (posts:posts) ''>
+lookup_view = 'post_edit', _prefix = '/', args = (), kwargs = {}
+possibilities = [([('posts/%(post_id)s/edit/', ['post_id'])], 'posts/(?P<post_id>[0-9]+)/edit/$', {}, {'post_id': <django.urls.converters.IntConverter object at 0x0000017E33317280>})]
+possibility = [('posts/%(post_id)s/edit/', ['post_id'])]
+pattern = 'posts/(?P<post_id>[0-9]+)/edit/$', defaults = {}
+converters = {'post_id': <django.urls.converters.IntConverter object at 0x0000017E33317280>}
+result = 'posts/%(post_id)s/edit/', params = ['post_id']
+
+    def _reverse_with_prefix(self, lookup_view, _prefix, *args, **kwargs):
+        if args and kwargs:
+            raise ValueError("Don't mix *args and **kwargs in call to reverse()!")
+    
+        if not self._populated:
+            self._populate()
+    
+        possibilities = self.reverse_dict.getlist(lookup_view)
+    
+        for possibility, pattern, defaults, converters in possibilities:
+            for result, params in possibility:
+                if args:
+                    if len(args) != len(params):
+                        continue
+                    candidate_subs = dict(zip(params, args))
+                else:
+                    if set(kwargs).symmetric_difference(params).difference(defaults):
+                        continue
+                    if any(kwargs.get(k, v) != v for k, v in defaults.items()):
+                        continue
+                    candidate_subs = kwargs
+                # Convert the candidate subs to text using Converter.to_url().
+                text_candidate_subs = {}
+                for k, v in candidate_subs.items():
+                    if k in converters:
+                        text_candidate_subs[k] = converters[k].to_url(v)
+                    else:
+                        text_candidate_subs[k] = str(v)
+                # WSGI provides decoded URLs, without %xx escapes, and the URL
+                # resolver operates on such URLs. First substitute arguments
+                # without quoting to build a decoded URL and look for a match.
+                # Then, if we have a match, redo the substitution with quoted
+                # arguments in order to return a properly encoded URL.
+                candidate_pat = _prefix.replace('%', '%%') + result
+                if re.search('^%s%s' % (re.escape(_prefix), pattern), candidate_pat % text_candidate_subs):
+                    # safe characters from `pchar` definition of RFC 3986
+                    url = quote(candidate_pat % text_candidate_subs, safe=RFC3986_SUBDELIMS + '/~:@')
+                    # Don't allow construction of scheme relative urls.
+                    return escape_leading_slashes(url)
+        # lookup_view can be URL name or callable, but callables are not
+        # friendly in error messages.
+        m = getattr(lookup_view, '__module__', None)
+        n = getattr(lookup_view, '__name__', None)
+        if m is not None and n is not None:
+            lookup_view_s = "%s.%s" % (m, n)
+        else:
+            lookup_view_s = lookup_view
+    
+        patterns = [pattern for (_, pattern, _, _) in possibilities]
+        if patterns:
+            if args:
+                arg_msg = "arguments '%s'" % (args,)
+            elif kwargs:
+                arg_msg = "keyword arguments '%s'" % (kwargs,)
+            else:
+                arg_msg = "no arguments"
+            msg = (
+                "Reverse for '%s' with %s not found. %d pattern(s) tried: %s" %
+                (lookup_view_s, arg_msg, len(patterns), patterns)
+            )
+        else:
+            msg = (
+                "Reverse for '%(view)s' not found. '%(view)s' is not "
+                "a valid view function or pattern name." % {'view': lookup_view_s}
+            )
+>       raise NoReverseMatch(msg)
+E       django.urls.exceptions.NoReverseMatch: Reverse for 'post_edit' with no arguments not found. 1 pattern(s) tried: ['posts/(?P<post_id>[0-9]+)/edit/$']
+
+venv\lib\site-packages\django\urls\resolvers.py:673: NoReverseMatch
+------------------------------ Captured log call ------------------------------
+ERROR    django.request:log.py:222 Internal Server Error: /posts/8/edit/
+Traceback (most recent call last):
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Ivan K\dev\hw03_forms\yatube\posts\views.py", line 12, in check_user
+    return func(request, *args, **kwargs)
+  File "C:\Users\Ivan K\dev\hw03_forms\yatube\posts\views.py", line 119, in post_edit
+    return render(request, tempalte, context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\shortcuts.py", line 36, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\test\utils.py", line 96, in instrumented_test_render
+    return self.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader_tags.py", line 150, in render
+    return compiled_parent._render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\test\utils.py", line 96, in instrumented_test_render
+    return self.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader_tags.py", line 62, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\defaulttags.py", line 309, in render
+    return nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\defaulttags.py", line 443, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\urls\base.py", line 90, in reverse
+    return iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs))
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\urls\resolvers.py", line 673, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'post_edit' with no arguments not found. 1 pattern(s) tried: ['posts/(?P<post_id>[0-9]+)/edit/$']
+______________ TestPostEditView.test_post_edit_view_author_post _______________
+
+self = <tests.test_post.TestPostEditView object at 0x0000017E35093BB0>
+user_client = <django.test.client.Client object at 0x0000017E35064970>
+post_with_group = <Post: Тестовый пост 2>
+
+    @pytest.mark.django_db(transaction=True)
+    def test_post_edit_view_author_post(self, user_client, post_with_group):
+        text = 'Проверка изменения поста!'
+        try:
+            response = user_client.get(f'/posts/{post_with_group.id}/edit')
+        except Exception as e:
+            assert False, f'''Страница `/posts/<post_id>/edit/` работает неправильно. Ошибка: `{e}`'''
+        url = (
+            f'/posts/{post_with_group.id}/edit/'
+            if response.status_code in (301, 302)
+            else f'/posts/{post_with_group.id}/edit'
+        )
+    
+>       response = user_client.post(url, data={'text': text, 'group': post_with_group.group_id})
+
+tests\test_post.py:108: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+venv\lib\site-packages\django\test\client.py:543: in post
+    response = super().post(path, data=data, content_type=content_type, secure=secure, **extra)
+venv\lib\site-packages\django\test\client.py:356: in post
+    return self.generic('POST', path, post_data, content_type,
+venv\lib\site-packages\django\test\client.py:422: in generic
+    return self.request(**r)
+venv\lib\site-packages\django\test\client.py:503: in request
+    raise exc_value
+venv\lib\site-packages\django\core\handlers\exception.py:34: in inner
+    response = get_response(request)
+venv\lib\site-packages\django\core\handlers\base.py:115: in _get_response
+    response = self.process_exception_by_middleware(e, request)
+venv\lib\site-packages\django\core\handlers\base.py:113: in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+yatube\posts\views.py:12: in check_user
+    return func(request, *args, **kwargs)
+yatube\posts\views.py:119: in post_edit
+    return render(request, tempalte, context)
+venv\lib\site-packages\django\shortcuts.py:36: in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+venv\lib\site-packages\django\template\loader.py:62: in render_to_string
+    return template.render(context, request)
+venv\lib\site-packages\django\template\backends\django.py:61: in render
+    return self.template.render(context)
+venv\lib\site-packages\django\template\base.py:171: in render
+    return self._render(context)
+venv\lib\site-packages\django\test\utils.py:96: in instrumented_test_render
+    return self.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\loader_tags.py:150: in render
+    return compiled_parent._render(context)
+venv\lib\site-packages\django\test\utils.py:96: in instrumented_test_render
+    return self.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\loader_tags.py:62: in render
+    result = block.nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\defaulttags.py:309: in render
+    return nodelist.render(context)
+venv\lib\site-packages\django\template\base.py:937: in render
+    bit = node.render_annotated(context)
+venv\lib\site-packages\django\template\base.py:904: in render_annotated
+    return self.render(context)
+venv\lib\site-packages\django\template\defaulttags.py:443: in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+venv\lib\site-packages\django\urls\base.py:90: in reverse
+    return iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs))
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <URLResolver <module 'posts.urls' from 'C:\\Users\\Ivan K\\dev\\hw03_forms\\yatube\\posts\\urls.py'> (posts:posts) ''>
+lookup_view = 'post_edit', _prefix = '/', args = (), kwargs = {}
+possibilities = [([('posts/%(post_id)s/edit/', ['post_id'])], 'posts/(?P<post_id>[0-9]+)/edit/$', {}, {'post_id': <django.urls.converters.IntConverter object at 0x0000017E33317280>})]
+possibility = [('posts/%(post_id)s/edit/', ['post_id'])]
+pattern = 'posts/(?P<post_id>[0-9]+)/edit/$', defaults = {}
+converters = {'post_id': <django.urls.converters.IntConverter object at 0x0000017E33317280>}
+result = 'posts/%(post_id)s/edit/', params = ['post_id']
+
+    def _reverse_with_prefix(self, lookup_view, _prefix, *args, **kwargs):
+        if args and kwargs:
+            raise ValueError("Don't mix *args and **kwargs in call to reverse()!")
+    
+        if not self._populated:
+            self._populate()
+    
+        possibilities = self.reverse_dict.getlist(lookup_view)
+    
+        for possibility, pattern, defaults, converters in possibilities:
+            for result, params in possibility:
+                if args:
+                    if len(args) != len(params):
+                        continue
+                    candidate_subs = dict(zip(params, args))
+                else:
+                    if set(kwargs).symmetric_difference(params).difference(defaults):
+                        continue
+                    if any(kwargs.get(k, v) != v for k, v in defaults.items()):
+                        continue
+                    candidate_subs = kwargs
+                # Convert the candidate subs to text using Converter.to_url().
+                text_candidate_subs = {}
+                for k, v in candidate_subs.items():
+                    if k in converters:
+                        text_candidate_subs[k] = converters[k].to_url(v)
+                    else:
+                        text_candidate_subs[k] = str(v)
+                # WSGI provides decoded URLs, without %xx escapes, and the URL
+                # resolver operates on such URLs. First substitute arguments
+                # without quoting to build a decoded URL and look for a match.
+                # Then, if we have a match, redo the substitution with quoted
+                # arguments in order to return a properly encoded URL.
+                candidate_pat = _prefix.replace('%', '%%') + result
+                if re.search('^%s%s' % (re.escape(_prefix), pattern), candidate_pat % text_candidate_subs):
+                    # safe characters from `pchar` definition of RFC 3986
+                    url = quote(candidate_pat % text_candidate_subs, safe=RFC3986_SUBDELIMS + '/~:@')
+                    # Don't allow construction of scheme relative urls.
+                    return escape_leading_slashes(url)
+        # lookup_view can be URL name or callable, but callables are not
+        # friendly in error messages.
+        m = getattr(lookup_view, '__module__', None)
+        n = getattr(lookup_view, '__name__', None)
+        if m is not None and n is not None:
+            lookup_view_s = "%s.%s" % (m, n)
+        else:
+            lookup_view_s = lookup_view
+    
+        patterns = [pattern for (_, pattern, _, _) in possibilities]
+        if patterns:
+            if args:
+                arg_msg = "arguments '%s'" % (args,)
+            elif kwargs:
+                arg_msg = "keyword arguments '%s'" % (kwargs,)
+            else:
+                arg_msg = "no arguments"
+            msg = (
+                "Reverse for '%s' with %s not found. %d pattern(s) tried: %s" %
+                (lookup_view_s, arg_msg, len(patterns), patterns)
+            )
+        else:
+            msg = (
+                "Reverse for '%(view)s' not found. '%(view)s' is not "
+                "a valid view function or pattern name." % {'view': lookup_view_s}
+            )
+>       raise NoReverseMatch(msg)
+E       django.urls.exceptions.NoReverseMatch: Reverse for 'post_edit' with no arguments not found. 1 pattern(s) tried: ['posts/(?P<post_id>[0-9]+)/edit/$']
+
+venv\lib\site-packages\django\urls\resolvers.py:673: NoReverseMatch
+------------------------------ Captured log call ------------------------------
+ERROR    django.request:log.py:222 Internal Server Error: /posts/9/edit/
+Traceback (most recent call last):
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\exception.py", line 34, in inner
+    response = get_response(request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\base.py", line 115, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\core\handlers\base.py", line 113, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Ivan K\dev\hw03_forms\yatube\posts\views.py", line 12, in check_user
+    return func(request, *args, **kwargs)
+  File "C:\Users\Ivan K\dev\hw03_forms\yatube\posts\views.py", line 119, in post_edit
+    return render(request, tempalte, context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\shortcuts.py", line 36, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\backends\django.py", line 61, in render
+    return self.template.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 171, in render
+    return self._render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\test\utils.py", line 96, in instrumented_test_render
+    return self.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader_tags.py", line 150, in render
+    return compiled_parent._render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\test\utils.py", line 96, in instrumented_test_render
+    return self.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\loader_tags.py", line 62, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\defaulttags.py", line 309, in render
+    return nodelist.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 937, in render
+    bit = node.render_annotated(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\base.py", line 904, in render_annotated
+    return self.render(context)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\template\defaulttags.py", line 443, in render
+    url = reverse(view_name, args=args, kwargs=kwargs, current_app=current_app)
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\urls\base.py", line 90, in reverse
+    return iri_to_uri(resolver._reverse_with_prefix(view, prefix, *args, **kwargs))
+  File "C:\Users\Ivan K\dev\hw03_forms\venv\lib\site-packages\django\urls\resolvers.py", line 673, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: Reverse for 'post_edit' with no arguments not found. 1 pattern(s) tried: ['posts/(?P<post_id>[0-9]+)/edit/$']
+======================== 3 failed, 17 passed in 2.28s =========================
