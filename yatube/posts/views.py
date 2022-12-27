@@ -9,13 +9,8 @@ from .utils import pagi
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     template = 'posts/group_list.html'
-<<<<<<< HEAD
     post_list = Post.objects.all().order_by('-pub_date')
     context = {
-=======
-    post_list = Post.objects.all().order_by('-pub_date')    
-    context = { 
->>>>>>> 736ece86a3bdbf60c67485ccecd8ace3a9eae591
         'title': group.title,
         'page_obj': pagi(request, post_list, POSTS_PER_PAGE),
         'description': group.description,
