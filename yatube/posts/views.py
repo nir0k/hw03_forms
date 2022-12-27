@@ -1,33 +1,20 @@
-from django.core.paginator import Paginator
-from django.shortcuts import render, get_object_or_404, redirect
-from .models import Post, Group, User
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+
+from .constants import POSTS_PER_PAGE
 from .forms import PostForm
-
-POSTS_PER_PAGE = 10
-
-
-def authorized_only(func):
-    def check_user(request, *args, **kwargs):
-        if request.user.is_authenticated:
-            return func(request, *args, **kwargs)
-        return redirect('/auth/login/')
-    return check_user
+from .models import Group, Post, User
+from .utils import pagi
 
 
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
-    title = group.title
-    description = group.description
     template = 'posts/group_list.html'
-    # posts = group.posts.all().order_by('-pub_date')[:POSTS_PER_PAGE]
-    post_list = Post.objects.all().order_by('-pub_date')
-    paginator = Paginator(post_list, POSTS_PER_PAGE)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = Post.objects.all().order_by('-pub_date')    
     context = {
-        'title': title,
-        'page_obj': page_obj,
-        'description': description,
+        'title': group.title,
+        'page_obj': pagi(request, post_list, POSTS_PER_PAGE),
+        'description': group.description,
     }
     return render(
         request,
@@ -39,13 +26,10 @@ def group_posts(request, slug):
 def index(request):
     template = 'posts/index.html'
     title = 'Последние обновления на сайте'
-    post_list = Post.objects.all().order_by('-pub_date')
-    paginator = Paginator(post_list, POSTS_PER_PAGE)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = Post.objects.all().order_by('-pub_date')    
     context = {
         'title': title,
-        'page_obj': page_obj,
+        'page_obj': pagi(request, post_list, POSTS_PER_PAGE),
     }
     return render(
         request,
@@ -56,14 +40,11 @@ def index(request):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    post_list = author.author_posts.all().order_by('-pub_date')
-    paginator = Paginator(post_list, POSTS_PER_PAGE)
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
+    post_list = author.author_posts.all().order_by('-pub_date') 
     title = 'Профайл пользователя'
     context = {
         'title': title,
-        'page_obj': page_obj,
+        'page_obj': pagi(request, post_list, POSTS_PER_PAGE),
         'author': author,
         'posts_count': post_list.count(),
     }
@@ -80,24 +61,23 @@ def post_detail(request, post_id):
     return render(request, 'posts/post_detail.html', context)
 
 
-@authorized_only
+@login_required
 def post_create(request):
     template = 'posts/create_post.html'
-    if request.method == 'POST':
-        form = PostForm(request.POST)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.text = form.cleaned_data['text']
-            post.save()
-            return redirect('posts:profile', request.user)
+    if request.method != 'POST':
+        form = PostForm()
         return render(
             request,
             template,
             {'form': form},
         )
-    form = PostForm()
-    form.fields['text'].required = True
+    form = PostForm(request.POST)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.text = form.cleaned_data['text']
+        post.save()
+        return redirect('posts:profile', request.user)
     return render(
         request,
         template,
@@ -105,34 +85,33 @@ def post_create(request):
     )
 
 
-@authorized_only
+@login_required
 def post_edit(request, post_id):
     template = 'posts/create_post.html'
     is_edit = True
     post = get_object_or_404(Post, id=post_id)
     groups = Group.objects.all()
     form = PostForm(instance=post)
-    form.fields['text'].required = True
     context = {
         'form': form,
         'is_edit': is_edit,
         'post_id': post_id,
         'groups': groups,
     }
-    if request.method == 'POST':
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save(commit=False)
-            post.author = request.user
-            post.text = form.cleaned_data['text']
-            post.group = form.cleaned_data['group']
-            post.save()
-            return redirect('posts:post_detail', post_id)
+    if request.method != 'POST':
         return render(
             request,
             template,
             context,
         )
+    form = PostForm(request.POST, instance=post)
+    if form.is_valid():
+        post = form.save(commit=False)
+        post.author = request.user
+        post.text = form.cleaned_data['text']
+        post.group = form.cleaned_data['group']
+        post.save()
+        return redirect('posts:post_detail', post_id)
     return render(
         request,
         template,
