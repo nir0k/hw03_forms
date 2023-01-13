@@ -14,12 +14,19 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    text = models.TextField(null=True)
-    pub_date = models.DateTimeField(auto_now_add=True)
+    text = models.TextField(
+        'Текст поста',
+        help_text='Введите текст поста'
+    )
+    pub_date = models.DateTimeField(
+        'Дата публикации',
+        auto_now_add=True
+    )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='author_posts'
+        related_name='author_posts',
+        verbose_name='Автор'
     )
     group = models.ForeignKey(
         Group,
@@ -27,8 +34,10 @@ class Post(models.Model):
         blank=True,
         null=True,
         max_length=200,
-        related_name='posts'
+        related_name='posts',
+        verbose_name='Группа',
+        help_text='Группа, к которой будет относиться пост'
     )
 
     def __str__(self):
-        return str(self.text)
+        return str(self.text[:15])
