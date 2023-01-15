@@ -9,7 +9,7 @@ from .utils import pagi
 def group_posts(request, slug):
     group = get_object_or_404(Group, slug=slug)
     template = 'posts/group_list.html'
-    post_list = Post.objects.all().order_by('-pub_date')
+    post_list = Post.objects.filter(group=group).order_by('-pub_date')
     context = {
         'title': group.title,
         'page_obj': pagi(request, post_list, POSTS_PER_PAGE),
